@@ -34,12 +34,16 @@ namespace Crop_Tool
         {
             this.Hide();
 
-            Bitmap printscreen = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
-                                     Screen.PrimaryScreen.Bounds.Height);
+            // Take screenshot from the active screen.
+            Bitmap printscreen = new Bitmap(Screen.FromControl(this).Bounds.Width,
+                                     Screen.FromControl(this).Bounds.Height);
 
             Graphics graphics = Graphics.FromImage(printscreen as Image);
 
-            graphics.CopyFromScreen(0, 0, 0, 0, printscreen.Size);
+            // Point the screenshot to the active window.
+            Point panelLocation = PointToScreen(new Point(0, 0));
+
+            graphics.CopyFromScreen(panelLocation.X, panelLocation.Y, 0, 0, printscreen.Size);
 
             using (MemoryStream s = new MemoryStream())
             {
