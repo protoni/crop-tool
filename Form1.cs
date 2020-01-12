@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -7,9 +9,12 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Windows.Storage;
 
 namespace Crop_Tool
 {
@@ -62,6 +67,7 @@ namespace Crop_Tool
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             Console.WriteLine("Image cropping started!");
+            sendImageAsync();
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
@@ -137,6 +143,52 @@ namespace Crop_Tool
 
             Console.WriteLine("Image saved");
             Application.Exit();
+        }
+
+        private async Task sendImageAsync()
+        {
+            Console.WriteLine("Sending the image over HTTP");
+            
+            HttpClient client = new HttpClient();
+
+           
+
+            // Create JSON content
+            JObject obj = new JObject();
+            obj["body"] = "test";
+
+            // Create image content
+            
+            StorageFile sfs = await StorageFile.GetFileFromPathAsync(homeWork.attachmentspath[i]);
+            
+            byte[] fileBytes;
+            using (var fileStream = await myImageFile.OpenStreamForReadAsync())
+            {
+                var binaryReader = new BinaryReader(fileStream);
+                fileBytes = binaryReader.ReadBytes((int)fileStream.Length);
+            }
+
+            var stringContent = new StringContent(obj.ToString(), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("http://localhost:3001/api/test", stringContent);
+            //var response = await client.PostAsync("https://www.google.com", content);
+            
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine("Sending the image over HTTP done! Response: " + responseString);
+            
+            
+            /*
+            using (var wb = new WebClient())
+            {
+                var data = new NameValueCollection();
+                data["username"] = "myUser";
+                data["password"] = "myPassword";
+
+                var response = wb.UploadValues("http://localhost:3001/api/test", "POST", data);
+                //var response = wb.UploadValues("https://www.google.com", "POST", data);
+                string responseInString = Encoding.UTF8.GetString(response);
+            }
+            */
         }
     }
 }
